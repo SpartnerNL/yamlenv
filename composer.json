@@ -1,0 +1,25 @@
+{
+    "name": "maatwebsite/yamlenv",
+    "description": "Reads `env.yaml` and makes a validated list of variables available as environment variables",
+    "keywords": ["env", "yaml", "environment"],
+    "license" : "LGPL",
+    "authors" : [
+        {
+            "name": "Maatwebsite",
+            "email": "jochem@maatwebsite.nl",
+            "homepage": "http://www.maatwebsite.nl"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.9",
+        "symfony/yaml": "~2.0|~3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Yamlenv\\": "src/"
+        }
+    }
+}

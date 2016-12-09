@@ -1,0 +1,8 @@
+---
+
+NVAR1: "Hello"
+NVAR2: "World!"
+NVAR3:
+  NVAR4: "Nested 1"
+  NVAR5:
+    NVAR6: "Nested 2"
