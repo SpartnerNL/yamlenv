@@ -26,6 +26,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
     public function testYamlenvLoadsEnvironmentVars()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->load();
         $this->assertSame('bar', getenv('FOO'));
@@ -36,6 +38,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
     public function testCommentedYamlenvLoadsEnvironmentVars()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder, 'commented.yaml');
         $yamlenv->load();
         $this->assertSame('bar', getenv('CFOO'));
@@ -49,6 +53,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
     public function testQuotedYamlenvLoadsEnvironmentVars()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder, 'quoted.yaml');
         $yamlenv->load();
         $this->assertSame('bar', getenv('QFOO'));
@@ -71,6 +77,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
     public function testYamlenvLoadsEnvGlobals()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->load();
         $this->assertSame('bar', $_SERVER['FOO']);
@@ -81,6 +89,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
     public function testYamlenvLoadsServerGlobals()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->load();
         $this->assertSame('bar', $_ENV['FOO']);
@@ -96,6 +106,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
      */
     public function testYamlenvRequiredStringEnvironmentVars()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->load();
         $yamlenv->required('FOO');
@@ -109,6 +121,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
      */
     public function testYamlenvRequiredArrayEnvironmentVars()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->load();
         $yamlenv->required(['FOO', 'BAR']);
@@ -117,6 +131,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
     public function testYamlenvNestedEnvironmentVars()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder, 'nested.yaml');
         $yamlenv->load();
 
@@ -133,6 +149,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
      */
     public function testYamlenvAllowedValues()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->load();
         $yamlenv->required('FOO')->allowedValues(array('bar', 'baz'));
@@ -149,6 +167,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
      */
     public function testYamlenvProhibitedValues()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->load();
         $yamlenv->required('FOO')->allowedValues(array('buzz'));
@@ -160,6 +180,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
      */
     public function testYamlenvRequiredThrowsRuntimeException()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->load();
         $this->assertFalse(getenv('FOOX'));
@@ -169,6 +191,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
     public function testYamlenvNullFileArgumentUsesDefault()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder, null);
         $yamlenv->load();
         $this->assertSame('bar', getenv('FOO'));
@@ -181,21 +205,35 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
      */
     public function testYamlenvTrimmedKeys()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder, 'quoted.yaml');
         $yamlenv->load();
         $this->assertSame('no space', getenv('QWHITESPACE'));
     }
 
+    /**
+     * @expectedException \Yamlenv\Exception\ImmutableException
+     * @expectedExceptionMessage Environment variables cannot be overwritten in an immutable environment. Tried overwriting "IMMUTABLE"
+     */
     public function testYamlenvLoadDoesNotOverwriteEnv()
     {
+        $this->clearEnv();
+
         putenv('IMMUTABLE=true');
         $yamlenv = new Yamlenv($this->fixturesFolder, 'immutable.yaml');
+
         $yamlenv->load();
-        $this->assertSame('true', getenv('IMMUTABLE'));
     }
 
+    /**
+     * @expectedException \Yamlenv\Exception\ImmutableException
+     * @expectedExceptionMessage Environment variables cannot be overwritten in an immutable environment. Tried overwriting "IMMUTABLE"
+     */
     public function testYamlenvLoadAfterOverload()
     {
+        $this->clearEnv();
+
         putenv('IMMUTABLE=true');
         $yamlenv = new Yamlenv($this->fixturesFolder, 'immutable.yaml');
         $yamlenv->overload();
@@ -206,8 +244,14 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
         $this->assertSame('true', getenv('IMMUTABLE'));
     }
 
+    /**
+     * @expectedException \Yamlenv\Exception\ImmutableException
+     * @expectedExceptionMessage Environment variables cannot be overwritten in an immutable environment. Tried overwriting "IMMUTABLE"
+     */
     public function testYamlenvOverloadAfterLoad()
     {
+        $this->clearEnv();
+
         putenv('IMMUTABLE=true');
         $yamlenv = new Yamlenv($this->fixturesFolder, 'immutable.yaml');
         $yamlenv->load();
@@ -220,6 +264,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
     public function testYamlenvOverloadDoesOverwriteEnv()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder, 'mutable.yaml');
         $yamlenv->overload();
         $this->assertSame('true', getenv('MUTABLE'));
@@ -227,6 +273,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
     public function testYamlenvAllowsSpecialCharacters()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder, 'specialchars.yaml');
         $yamlenv->load();
         $this->assertSame('$a6^C7k%zs+e^.jvjXk', getenv('SPVAR1'));
@@ -238,6 +286,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
     public function testYamlenvAssertions()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yaml');
         $yamlenv->load();
         $this->assertSame('val1', getenv('ASSERTVAR1'));
@@ -271,6 +321,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
      */
     public function testYamlenvEmptyThrowsRuntimeException()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yaml');
         $yamlenv->load();
         $this->assertEmpty(getenv('ASSERTVAR2'));
@@ -284,6 +336,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
      */
     public function testYamlenvStringOfSpacesConsideredEmpty()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yaml');
         $yamlenv->load();
         $this->assertEmpty(getenv('ASSERTVAR3'));
@@ -297,6 +351,8 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
      */
     public function testYamlenvHitsLastChain()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yaml');
         $yamlenv->load();
         $yamlenv->required('ASSERTVAR3')->notEmpty();
@@ -308,15 +364,41 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
      */
     public function testYamlenvValidateRequiredWithoutLoading()
     {
+        $this->clearEnv();
+
         $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yaml');
         $yamlenv->required('foo');
     }
 
     public function testYamlenvRequiredCanBeUsedWithoutLoadingFile()
     {
+        $this->clearEnv();
+
         putenv('REQUIRED_VAR=1');
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->required('REQUIRED_VAR')->notEmpty();
         $this->assertTrue(true);
+    }
+
+    /**
+     * Clear all env vars
+     */
+    private function clearEnv()
+    {
+        foreach ($_ENV as $key => $value) {
+            $this->clearEnvironmentVariable($key);
+        }
+    }
+
+    /**
+     * @param $name
+     */
+    private function clearEnvironmentVariable($name)
+    {
+        if (function_exists('putenv')) {
+            putenv($name);
+        }
+
+        unset($_ENV[$name], $_SERVER[$name]);
     }
 }
