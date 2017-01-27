@@ -19,14 +19,21 @@ class Yamlenv
     protected $loader;
 
     /**
+     * @var bool
+     */
+    private $castToUpper;
+
+    /**
      * Create a new Yamlenv instance.
      *
      * @param string $path
      * @param string $file
+     * @param bool   $castToUpper
      */
-    public function __construct($path, $file = 'env.yaml')
+    public function __construct($path, $file = 'env.yaml', $castToUpper = false)
     {
-        $this->filePath = $this->getFilePath($path, $file);
+        $this->filePath    = $this->getFilePath($path, $file);
+        $this->castToUpper = $castToUpper;
     }
 
     /**
@@ -59,6 +66,7 @@ class Yamlenv
     public function required($variable)
     {
         $this->initialize();
+
         return new Validator((array) $variable, $this->loader);
     }
 
@@ -82,13 +90,17 @@ class Yamlenv
     }
 
     /**
-     * Initialize loader
+     * Initialize loader.
      *
      * @param bool $overload
      */
     protected function initialize($overload = false)
     {
         $this->loader = new Loader($this->filePath, !$overload);
+
+        if ($this->castToUpper) {
+            $this->loader->forceUpperCase();
+        }
     }
 
     /**
@@ -101,6 +113,7 @@ class Yamlenv
     protected function loadData($overload = false)
     {
         $this->initialize($overload);
+
         return $this->loader->load();
     }
 }

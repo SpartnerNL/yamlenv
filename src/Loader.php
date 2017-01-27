@@ -3,6 +3,7 @@
 namespace Yamlenv;
 
 use Symfony\Component\Yaml\Yaml;
+use Yamlenv\Exception\ImmutableException;
 use Yamlenv\Exception\InvalidFileException;
 use Yamlenv\Exception\InvalidPathException;
 
@@ -28,15 +29,22 @@ class Loader
     protected $yamlVariables;
 
     /**
+     * @var bool
+     */
+    private $castToUpper;
+
+    /**
      * Create a new loader instance.
      *
      * @param string $filePath
      * @param bool   $immutable
+     * @param bool   $castToUpper
      */
-    public function __construct($filePath, $immutable = false)
+    public function __construct($filePath, $immutable = false, $castToUpper = false)
     {
-        $this->filePath  = $filePath;
-        $this->immutable = $immutable;
+        $this->filePath    = $filePath;
+        $this->immutable   = $immutable;
+        $this->castToUpper = $castToUpper;
     }
 
     /**
@@ -114,6 +122,8 @@ class Loader
      *
      * @param string      $name
      * @param string|null $value
+     *
+     * @throws ImmutableException
      */
     public function setEnvironmentVariable($name, $value = null)
     {
@@ -122,7 +132,7 @@ class Loader
         // Don't overwrite existing environment variables if we're immutable
         // Ruby's dotenv does this with `ENV[key] ||= value`.
         if ($this->immutable && $this->getEnvironmentVariable($name) !== null) {
-            return;
+            $this->throwImmutableException($name);
         }
 
         // If PHP is running as an Apache module and an existing
@@ -140,6 +150,14 @@ class Loader
     }
 
     /**
+     * Set internal setting to force casting to uppercase.
+     */
+    public function forceUpperCase()
+    {
+        $this->castToUpper = true;
+    }
+
+    /**
      * Strips quotes from the environment variable value.
      *
      * @param string $value
@@ -149,8 +167,7 @@ class Loader
     protected function sanitiseVariableValue($value)
     {
         // Symfony Yaml parser automatically converts booleans to the correct type, which does not work in the env setters
-        if(is_bool($value))
-        {
+        if (is_bool($value)) {
             $value = $value === true ? 'true' : 'false';
         }
 
@@ -172,6 +189,8 @@ class Loader
     /**
      * Read lines from the file, auto detecting line endings.
      *
+     * @throws InvalidFileException
+     *
      * @return mixed
      */
     protected function readYaml()
@@ -189,6 +208,8 @@ class Loader
      * @param $array
      * @param null $parentKey
      *
+     * @throws ImmutableException
+     *
      * @return array
      */
     private function flattenNestedValues($array, $parentKey = null)
@@ -199,8 +220,18 @@ class Loader
             $combinedKey = $this->getCombinedKey($key, $parentKey);
 
             if ($this->isAssociativeArray($value)) {
-                $outputArray = array_merge($outputArray, $this->flattenNestedValues($value, $combinedKey));
+                $flattenedValues = $this->flattenNestedValues($value, $combinedKey);
+
+                if (count(array_intersect_assoc($outputArray, $flattenedValues)) > 0) {
+                    $this->throwImmutableException($combinedKey);
+                }
+
+                $outputArray = array_merge($outputArray, $flattenedValues);
             } else {
+                if ($this->immutable && array_key_exists($combinedKey, $outputArray)) {
+                    $this->throwImmutableException($combinedKey);
+                }
+
                 $outputArray[$combinedKey] = $value;
             }
         }
@@ -219,7 +250,7 @@ class Loader
      */
     private function getCombinedKey($key, $parentKey = '', $separator = '_')
     {
-        return (($parentKey) ? $parentKey . $separator . $key : $key);
+        return $this->normalizeKey(($parentKey) ? $parentKey . $separator . $key : $key);
     }
 
     /**
@@ -246,5 +277,36 @@ class Loader
         foreach ($this->flattenNestedValues($this->yamlVariables) as $name => $value) {
             $this->setEnvironmentVariable($name, $value);
         }
+    }
+
+    /**
+     * Perform normalization action based on class options.
+     *
+     * @param $key
+     *
+     * @return string
+     */
+    private function normalizeKey($key)
+    {
+        if ($this->castToUpper) {
+            $key = strtoupper($key);
+        }
+
+        return $key;
+    }
+
+    /**
+     * Throw Immutable exception with key message.
+     *
+     * @param $key
+     *
+     * @throws ImmutableException
+     */
+    private function throwImmutableException($key)
+    {
+        throw new ImmutableException(sprintf(
+            'Environment variables cannot be overwritten in an immutable environment. Tried overwriting "%s"',
+            $key
+        ));
     }
 }
