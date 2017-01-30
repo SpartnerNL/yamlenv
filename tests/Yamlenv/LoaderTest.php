@@ -61,6 +61,11 @@ class LoaderTest extends PHPUnit_Framework_TestCase
         $this->assertSame(false, isset($_SERVER[$this->key()]));
     }
 
+    public function testLoaderCanGetServerVariables()
+    {
+        $this->assertSame($_SERVER['PHP_SELF'], $this->immutableLoader->getEnvironmentVariable('PHP_SELF'));
+    }
+
     /**
      * Returns the key from keyVal(), without reset.
      *
