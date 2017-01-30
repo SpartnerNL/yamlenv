@@ -98,16 +98,12 @@ class Validator
      * @param callable $callback
      * @param string   $message
      *
-     * @throws \Yamlenv\Exception\InvalidCallbackException|\Yamlenv\Exception\ValidationException
+     * @throws \Yamlenv\Exception\ValidationException
      *
      * @return \Yamlenv\Validator
      */
-    protected function assertCallback($callback, $message = 'failed callback assertion')
+    private function assertCallback($callback, $message = 'failed callback assertion')
     {
-        if (!is_callable($callback)) {
-            throw new InvalidCallbackException('The provided callback must be callable.');
-        }
-
         $variablesFailingAssertion = [];
         foreach ($this->variables as $variableName) {
             $variableValue = $this->loader->getEnvironmentVariable($variableName);

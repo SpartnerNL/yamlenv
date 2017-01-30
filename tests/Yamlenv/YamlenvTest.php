@@ -1,5 +1,6 @@
 <?php
 
+use Yamlenv\Validator;
 use Yamlenv\Yamlenv;
 
 class YamlenvTest extends PHPUnit_Framework_TestCase
@@ -110,8 +111,9 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->load();
-        $yamlenv->required('FOO');
-        $this->assertTrue(true); // anything wrong an exception will be thrown
+        $validator = $yamlenv->required('FOO');
+
+        $this->assertInstanceOf(Validator::class, $validator);
     }
 
     /**
@@ -125,8 +127,27 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->load();
-        $yamlenv->required(['FOO', 'BAR']);
-        $this->assertTrue(true); // anything wrong an exception will be thrown
+        $validator = $yamlenv->required(['FOO', 'BAR']);
+
+        $this->assertInstanceOf(Validator::class, $validator);
+    }
+
+    /**
+     * @depends testYamlenvLoadsEnvironmentVars
+     * @depends testYamlenvLoadsEnvGlobals
+     * @depends testYamlenvLoadsServerGlobals
+     *
+     * @expectedException \Yamlenv\Exception\ValidationException
+     * @expectedExceptionMessage One or more environment variables failed assertions: FOO is not an integer.
+     */
+    public function testYamlenvRequiredIntegerEnvironmentVar()
+    {
+        $this->clearEnv();
+
+        $yamlenv = new Yamlenv($this->fixturesFolder);
+        $yamlenv->load();
+
+        $yamlenv->required(['FOO'])->isInteger();
     }
 
     public function testYamlenvNestedEnvironmentVars()
@@ -153,8 +174,9 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->load();
-        $yamlenv->required('FOO')->allowedValues(array('bar', 'baz'));
-        $this->assertTrue(true); // anything wrong an exception will be thrown
+        $validator = $yamlenv->required('FOO')->allowedValues(['bar', 'baz']);
+
+        $this->assertInstanceOf(Validator::class, $validator);
     }
 
     /**
@@ -171,7 +193,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->load();
-        $yamlenv->required('FOO')->allowedValues(array('buzz'));
+        $yamlenv->required('FOO')->allowedValues(['buzz']);
     }
 
     /**
@@ -186,7 +208,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
         $yamlenv->load();
         $this->assertFalse(getenv('FOOX'));
         $this->assertFalse(getenv('NOPE'));
-        $yamlenv->required(array('FOOX', 'NOPE'));
+        $yamlenv->required(['FOOX', 'NOPE']);
     }
 
     public function testYamlenvNullFileArgumentUsesDefault()
@@ -284,6 +306,40 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
         $this->assertSame('test some escaped characters like a quote " or maybe a backslash \\', getenv('SPVAR5'));
     }
 
+    public function testYamlenvConvertsToUppercase()
+    {
+        $this->clearEnv();
+
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'lowercase.yaml', true);
+        $yamlenv->load();
+
+        $validator = $yamlenv->required([
+            'LCVAR1',
+            'LCVAR2',
+            'LCVAR3',
+        ])->notEmpty();
+
+        $this->assertInstanceOf(Validator::class, $validator);
+    }
+
+    /**
+     * @expectedException \Yamlenv\Exception\ValidationException
+     * @expectedExceptionMessage One or more environment variables failed assertions: LCVAR1 is missing, LCVAR2 is missing, LCVAR3 is missing.
+     */
+    public function testYamlenvFailsIfNotConvertedToUppercase()
+    {
+        $this->clearEnv();
+
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'lowercase.yaml', false);
+        $yamlenv->load();
+
+        $yamlenv->required([
+            'LCVAR1',
+            'LCVAR2',
+            'LCVAR3',
+        ]);
+    }
+
     public function testYamlenvAssertions()
     {
         $this->clearEnv();
@@ -295,24 +351,28 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
         $this->assertEmpty(getenv('ASSERTVAR3'));
         $this->assertSame('0', getenv('ASSERTVAR4'));
 
-        $yamlenv->required(array(
+        $validator = $yamlenv->required([
             'ASSERTVAR1',
             'ASSERTVAR2',
             'ASSERTVAR3',
             'ASSERTVAR4',
-        ));
+        ]);
 
-        $yamlenv->required(array(
+        $this->assertInstanceOf(Validator::class, $validator);
+
+        $validator = $yamlenv->required([
             'ASSERTVAR1',
             'ASSERTVAR4',
-        ))->notEmpty();
+        ])->notEmpty();
 
-        $yamlenv->required(array(
+        $this->assertInstanceOf(Validator::class, $validator);
+
+        $validator = $yamlenv->required([
             'ASSERTVAR1',
             'ASSERTVAR4',
-        ))->notEmpty()->allowedValues(array('0', 'val1'));
+        ])->notEmpty()->allowedValues(['0', 'val1']);
 
-        $this->assertTrue(true); // anything wrong an an exception will be thrown
+        $this->assertInstanceOf(Validator::class, $validator);
     }
 
     /**
@@ -376,12 +436,13 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
         putenv('REQUIRED_VAR=1');
         $yamlenv = new Yamlenv($this->fixturesFolder);
-        $yamlenv->required('REQUIRED_VAR')->notEmpty();
-        $this->assertTrue(true);
+        $validator = $yamlenv->required('REQUIRED_VAR')->notEmpty();
+
+        $this->assertInstanceOf(Validator::class, $validator);
     }
 
     /**
-     * Clear all env vars
+     * Clear all env vars.
      */
     private function clearEnv()
     {
