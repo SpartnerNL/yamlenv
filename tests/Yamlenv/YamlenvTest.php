@@ -1,5 +1,6 @@
 <?php
 
+use Yamlenv\Loader;
 use Yamlenv\Validator;
 use Yamlenv\Yamlenv;
 
@@ -128,7 +129,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->load();
         $validator = $yamlenv->required(['FOO', 'BAR']);
-
+-
         $this->assertInstanceOf(Validator::class, $validator);
     }
 
@@ -234,24 +235,17 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
         $this->assertSame('no space', getenv('QWHITESPACE'));
     }
 
-    /**
-     * @expectedException \Yamlenv\Exception\ImmutableException
-     * @expectedExceptionMessage Environment variables cannot be overwritten in an immutable environment. Tried overwriting "IMMUTABLE"
-     */
     public function testYamlenvLoadDoesNotOverwriteEnv()
     {
         $this->clearEnv();
 
         putenv('IMMUTABLE=true');
         $yamlenv = new Yamlenv($this->fixturesFolder, 'immutable.yaml');
-
         $yamlenv->load();
+
+        $this->assertSame('true', getenv('IMMUTABLE'));
     }
 
-    /**
-     * @expectedException \Yamlenv\Exception\ImmutableException
-     * @expectedExceptionMessage Environment variables cannot be overwritten in an immutable environment. Tried overwriting "IMMUTABLE"
-     */
     public function testYamlenvLoadAfterOverload()
     {
         $this->clearEnv();
@@ -266,10 +260,6 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
         $this->assertSame('true', getenv('IMMUTABLE'));
     }
 
-    /**
-     * @expectedException \Yamlenv\Exception\ImmutableException
-     * @expectedExceptionMessage Environment variables cannot be overwritten in an immutable environment. Tried overwriting "IMMUTABLE"
-     */
     public function testYamlenvOverloadAfterLoad()
     {
         $this->clearEnv();
@@ -440,6 +430,27 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf(Validator::class, $validator);
     }
+
+    public function testGetLoaderGetsLoaderInstanceAfterLoad()
+    {
+        $yamlenv = new Yamlenv($this->fixturesFolder);
+        $yamlenv->load();
+
+        $loader = $yamlenv->getLoader();
+
+        $this->assertInstanceOf(Loader::class, $loader);
+    }
+
+    /**
+     * @expectedException \Yamlenv\Exception\LoaderException
+     * @expectedExceptionMessage Loader has not been initialized yet.
+     */
+    public function testGetLoaderGivesNullBeforeLoad()
+    {
+        $yamlenv = new Yamlenv($this->fixturesFolder);
+        $yamlenv->getLoader();
+    }
+
 
     /**
      * Clear all env vars.

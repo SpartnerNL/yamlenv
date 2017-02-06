@@ -1,0 +1,5 @@
+---
+
+DUPLICATE_VARIABLE: 'original'
+DUPLICATE:
+  VARIABLE: 'duplicate'

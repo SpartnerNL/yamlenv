@@ -111,6 +111,26 @@ class Loader
     }
 
     /**
+     * Make Yamlenv immutable.
+     *
+     * This means that once set, an environment variable cannot be overridden.
+     */
+    public function makeImmutable()
+    {
+        $this->immutable = true;
+    }
+
+    /**
+     * Make Yamlenv mutable.
+     *
+     * Environment variables can be overridden
+     */
+    public function makeMutable()
+    {
+        $this->immutable = false;
+    }
+
+    /**
      * Set an environment variable.
      *
      * This is done using:
@@ -120,19 +140,31 @@ class Loader
      *
      * The environment variable value is stripped of single and double quotes.
      *
-     * @param string      $name
-     * @param string|null $value
-     *
      * @throws ImmutableException
+     *
+     * @param string $name
+     * @param string|null $value
+     * @param bool $initialization
      */
-    public function setEnvironmentVariable($name, $value = null)
+    public function setEnvironmentVariable($name, $value = null, $initialization = false)
     {
         $value = $this->sanitiseVariableValue($value);
 
         // Don't overwrite existing environment variables if we're immutable
         // Ruby's dotenv does this with `ENV[key] ||= value`.
         if ($this->immutable && $this->getEnvironmentVariable($name) !== null) {
-            $this->throwImmutableException($name);
+
+            // During initialization we want to keep all existing environment variables
+            // e.g. Anything set on an apache or server level
+            if($initialization)
+            {
+                return;
+            }
+
+            throw new ImmutableException(sprintf(
+                'Environment variables cannot be overwritten in an immutable environment. Tried overwriting "%s"',
+                $name
+            ));
         }
 
         // If PHP is running as an Apache module and an existing
@@ -220,18 +252,18 @@ class Loader
             $combinedKey = $this->getCombinedKey($key, $parentKey);
 
             if ($this->isAssociativeArray($value)) {
+
                 $flattenedValues = $this->flattenNestedValues($value, $combinedKey);
 
-                if (count(array_intersect_assoc($outputArray, $flattenedValues)) > 0) {
-                    $this->throwImmutableException($combinedKey);
+                if (count(array_intersect_assoc(array_keys($outputArray), array_keys($flattenedValues))) > 0) {
+                    throw new ImmutableException(sprintf(
+                        'Environment variables cannot be overwritten in an immutable environment. Tried overwriting "%s"',
+                        $combinedKey
+                    ));
                 }
 
                 $outputArray = array_merge($outputArray, $flattenedValues);
             } else {
-                if ($this->immutable && array_key_exists($combinedKey, $outputArray)) {
-                    $this->throwImmutableException($combinedKey);
-                }
-
                 $outputArray[$combinedKey] = $value;
             }
         }
@@ -275,7 +307,7 @@ class Loader
     private function setEnvironmentVariables()
     {
         foreach ($this->flattenNestedValues($this->yamlVariables) as $name => $value) {
-            $this->setEnvironmentVariable($name, $value);
+            $this->setEnvironmentVariable($name, $value, true);
         }
     }
 
@@ -293,20 +325,5 @@ class Loader
         }
 
         return $key;
-    }
-
-    /**
-     * Throw Immutable exception with key message.
-     *
-     * @param $key
-     *
-     * @throws ImmutableException
-     */
-    private function throwImmutableException($key)
-    {
-        throw new ImmutableException(sprintf(
-            'Environment variables cannot be overwritten in an immutable environment. Tried overwriting "%s"',
-            $key
-        ));
     }
 }

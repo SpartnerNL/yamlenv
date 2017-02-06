@@ -2,6 +2,8 @@
 
 namespace Yamlenv;
 
+use Yamlenv\Exception\LoaderException;
+
 class Yamlenv
 {
     /**
@@ -68,6 +70,23 @@ class Yamlenv
         $this->initialize();
 
         return new Validator((array) $variable, $this->loader);
+    }
+
+    /**
+     * Get loader instance
+     *
+     * @throws LoaderException
+     *
+     * @return Loader
+     */
+    public function getLoader()
+    {
+        if(!$this->loader)
+        {
+            throw new LoaderException('Loader has not been initialized yet.');
+        }
+
+        return $this->loader;
     }
 
     /**

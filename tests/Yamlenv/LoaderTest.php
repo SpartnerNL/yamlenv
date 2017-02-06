@@ -22,9 +22,33 @@ class LoaderTest extends PHPUnit_Framework_TestCase
      */
     private $mutableLoader;
 
+    public static function setupBeforeClass()
+    {
+        if (!function_exists('apache_getenv')) {
+            /**
+             * @param $string
+             *
+             * @return array|false|string
+             */
+            function apache_getenv($string) {
+                return getenv($string);
+            }
+        }
+
+        if(!function_exists('apache_setenv'))
+        {
+            /**
+             * @param $string
+             */
+            function apache_setenv($string) {
+                putenv($string);
+            }
+        }
+    }
+
     public function setUp()
     {
-        $this->folder = dirname(__DIR__) . '/fixtures/valid';
+        $this->folder = dirname(__DIR__) . '/fixtures/valid/env.yaml';
 
         // Generate a new, random keyVal.
         $this->keyVal(true);
@@ -61,9 +85,61 @@ class LoaderTest extends PHPUnit_Framework_TestCase
         $this->assertSame(false, isset($_SERVER[$this->key()]));
     }
 
+    /**
+     * @expectedException \Yamlenv\Exception\ImmutableException
+     * @expectedExceptionMessage Environment variables cannot be overwritten in an immutable environment.
+     */
+    public function testMutableLoaderCanBeSetToImmutable()
+    {
+        // Set an environment variable.
+        $this->mutableLoader->setEnvironmentVariable($this->key(), $this->value());
+
+        // Set loader to immutable
+        $this->mutableLoader->makeImmutable();
+
+        // Try to override an environment variable.
+        $this->mutableLoader->setEnvironmentVariable($this->key(), 'foobar');
+    }
+
+    public function testImmutableLoaderCanBeSetToMutable()
+    {
+        // Set an environment variable.
+        $this->immutableLoader->setEnvironmentVariable($this->key(), $this->value());
+
+        // Set loader to immutable
+        $this->immutableLoader->makeMutable();
+
+        // Try to override an environment variable.
+        $this->immutableLoader->setEnvironmentVariable($this->key(), 'foobar');
+
+        $this->assertSame('foobar', $this->immutableLoader->getEnvironmentVariable($this->key()));
+        $this->assertSame('foobar', getenv($this->key()));
+    }
+
     public function testLoaderCanGetServerVariables()
     {
         $this->assertSame($_SERVER['PHP_SELF'], $this->immutableLoader->getEnvironmentVariable('PHP_SELF'));
+    }
+
+    public function testLoaderCanGetApacheVariables()
+    {
+        $this->keyVal(true);
+        apache_setenv($this->key(), 'test');
+
+        $this->immutableLoader->setEnvironmentVariable($this->key(), $this->value());
+        $this->assertSame($this->value(), $this->immutableLoader->getEnvironmentVariable($this->key()));
+    }
+
+    /**
+     * @expectedException \Yamlenv\Exception\ImmutableException
+     * @expectedExceptionMessage Environment variables cannot be overwritten in an immutable environment.
+     */
+    public function testFlattenNestedValuesThrowsExceptionWithDuplication()
+    {
+        $this->clearEnv();
+
+        $immutableLoader = new Loader(dirname(__DIR__) . '/fixtures/valid/duplicates_nested.yaml', true);
+        $immutableLoader->load();
     }
 
     /**
@@ -110,5 +186,27 @@ class LoaderTest extends PHPUnit_Framework_TestCase
         $keyVal = $this->keyVal();
 
         return reset($keyVal);
+    }
+
+    /**
+     * Clear all env vars.
+     */
+    private function clearEnv()
+    {
+        foreach ($_ENV as $key => $value) {
+            $this->clearEnvironmentVariable($key);
+        }
+    }
+
+    /**
+     * @param $name
+     */
+    private function clearEnvironmentVariable($name)
+    {
+        if (function_exists('putenv')) {
+            putenv($name);
+        }
+
+        unset($_ENV[$name], $_SERVER[$name]);
     }
 }
