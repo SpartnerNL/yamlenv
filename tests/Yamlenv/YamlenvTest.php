@@ -42,7 +42,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
     {
         $this->clearEnv();
 
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'commented.yaml');
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'commented.yml');
         $yamlenv->load();
         $this->assertSame('bar', getenv('CFOO'));
         $this->assertFalse(getenv('CBAR'));
@@ -57,7 +57,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
     {
         $this->clearEnv();
 
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'quoted.yaml');
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'quoted.yml');
         $yamlenv->load();
         $this->assertSame('bar', getenv('QFOO'));
         $this->assertSame('baz', getenv('QBAR'));
@@ -73,7 +73,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
      */
     public function testSpacedValuesWithoutQuotesThrowsException()
     {
-        $yamlenv = new Yamlenv(dirname(__DIR__) . '/fixtures/invalid', 'invalid.yaml');
+        $yamlenv = new Yamlenv(dirname(__DIR__) . '/fixtures/invalid', 'invalid.yml');
         $yamlenv->load();
     }
 
@@ -155,7 +155,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
     {
         $this->clearEnv();
 
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'nested.yaml');
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'nested.yml');
         $yamlenv->load();
 
         $this->assertSame('Hello', $_ENV['NVAR1']);
@@ -230,7 +230,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
     {
         $this->clearEnv();
 
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'quoted.yaml');
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'quoted.yml');
         $yamlenv->load();
         $this->assertSame('no space', getenv('QWHITESPACE'));
     }
@@ -240,7 +240,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
         $this->clearEnv();
 
         putenv('IMMUTABLE=true');
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'immutable.yaml');
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'immutable.yml');
         $yamlenv->load();
 
         $this->assertSame('true', getenv('IMMUTABLE'));
@@ -251,7 +251,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
         $this->clearEnv();
 
         putenv('IMMUTABLE=true');
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'immutable.yaml');
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'immutable.yml');
         $yamlenv->overload();
         $this->assertSame('false', getenv('IMMUTABLE'));
 
@@ -265,7 +265,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
         $this->clearEnv();
 
         putenv('IMMUTABLE=true');
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'immutable.yaml');
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'immutable.yml');
         $yamlenv->load();
         $this->assertSame('true', getenv('IMMUTABLE'));
 
@@ -278,7 +278,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
     {
         $this->clearEnv();
 
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'mutable.yaml');
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'mutable.yml');
         $yamlenv->overload();
         $this->assertSame('true', getenv('MUTABLE'));
     }
@@ -287,7 +287,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
     {
         $this->clearEnv();
 
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'specialchars.yaml');
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'specialchars.yml');
         $yamlenv->load();
         $this->assertSame('$a6^C7k%zs+e^.jvjXk', getenv('SPVAR1'));
         $this->assertSame('?BUty3koaV3%GA*hMAwH}B', getenv('SPVAR2'));
@@ -300,7 +300,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
     {
         $this->clearEnv();
 
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'lowercase.yaml', true);
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'lowercase.yml', true);
         $yamlenv->load();
 
         $validator = $yamlenv->required([
@@ -320,7 +320,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
     {
         $this->clearEnv();
 
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'lowercase.yaml', false);
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'lowercase.yml', false);
         $yamlenv->load();
 
         $yamlenv->required([
@@ -334,7 +334,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
     {
         $this->clearEnv();
 
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yaml');
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yml');
         $yamlenv->load();
         $this->assertSame('val1', getenv('ASSERTVAR1'));
         $this->assertEmpty(getenv('ASSERTVAR2'));
@@ -373,7 +373,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
     {
         $this->clearEnv();
 
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yaml');
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yml');
         $yamlenv->load();
         $this->assertEmpty(getenv('ASSERTVAR2'));
 
@@ -388,7 +388,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
     {
         $this->clearEnv();
 
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yaml');
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yml');
         $yamlenv->load();
         $this->assertEmpty(getenv('ASSERTVAR3'));
 
@@ -403,7 +403,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
     {
         $this->clearEnv();
 
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yaml');
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yml');
         $yamlenv->load();
         $yamlenv->required('ASSERTVAR3')->notEmpty();
     }
@@ -416,7 +416,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
     {
         $this->clearEnv();
 
-        $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yaml');
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'assertions.yml');
         $yamlenv->required('foo');
     }
 

@@ -1,6 +1,6 @@
 {
     "name": "maatwebsite/yamlenv",
-    "description": "Reads `env.yaml` and makes a validated list of variables available as environment variables",
+    "description": "Reads `env.yml` and makes a validated list of variables available as environment variables",
     "keywords": ["env", "yaml", "environment"],
     "license" : "LGPL",
     "authors" : [

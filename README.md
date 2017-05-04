@@ -1,15 +1,15 @@
 Maatwebsite\Yamlenv
 ==========
 
-Reads env.yaml and makes a validated list of variables available as environment variables. 
+Reads env.yml and makes a validated list of variables available as environment variables. 
 
 This is package is based on [vlucas/phpdotenv](https://github.com/vlucas/phpdotenv).
 
 [![Build Status](https://travis-ci.org/Maatwebsite/yamlenv.svg?branch=master)](https://travis-ci.org/Maatwebsite/yamlenv.svg?branch=master)
 
-Why choose Yaml over env.yaml?
+Why choose Yaml over env.yml?
 ---------
-The benefits of using a env.yaml file or similar has been proven a long time ago. 
+The benefits of using a env.yml file or similar has been proven a long time ago. 
 The popularity of [vlucas/phpdotenv](https://github.com/vlucas/phpdotenv) and 
 similar packages is a testament of this. 
 There is no reason why you shouldn't use a package like that in your projects, 
@@ -19,7 +19,7 @@ In case of larger, enterprise scale, applications, the amount of environment
 settings might very quickly become unmanageable. If it's a multi tenant system een more so. And if you're supporting different versions of the application with it's own list of required environment settings, it soon becomes a necessity to automate this process. 
 
 These are largely the reasons we decided to move towards Yaml. It provides 
-a few simple advantages over env.yaml files:
+a few simple advantages over env.yml files:
 * It allows nesting, to allow grouping of certain settings ( like database 
 connection credentials ).
 * It is easily readable by human as well as multiple automated deployment 
@@ -46,22 +46,22 @@ great base to work from!
 
 Of course there are a few things unique to Yamlenv, and that has been added as well. 
 
-The `env.yaml` file is generally kept out of version control since it can contain
-sensitive API keys and passwords. A separate `env.yaml.dist` file can be created
+The `env.yml` file is generally kept out of version control since it can contain
+sensitive API keys and passwords. A separate `env.yml.dist` file can be created
 with all the required environment variables defined except for the sensitive
 ones, which are either user-supplied for their own development environments or
 are communicated elsewhere to project collaborators. The project collaborators
-then independently copy the `env.yaml.dist` file to a local `env.yaml` and ensure
+then independently copy the `env.yml.dist` file to a local `env.yml` and ensure
 all the settings are correct for their local environment, filling in the secret
-keys or providing their own values when necessary. In this usage, the `env.yaml`
+keys or providing their own values when necessary. In this usage, the `env.yml`
 file should be added to the project's `.gitignore` file so that it will never
 be committed by collaborators.  This usage ensures that no sensitive passwords
 or API keys will ever be in the version control history so there is less risk
 of a security breach, and production values will never have to be shared with
 all project collaborators.
 
-Add your application configuration to a `env.yaml` file in the root of your
-project. **Make sure the `env.yaml` file is added to your `.gitignore` so it is not
+Add your application configuration to a `env.yml` file in the root of your
+project. **Make sure the `env.yml` file is added to your `.gitignore` so it is not
 checked-in the code**
 
 ```shell
@@ -69,7 +69,7 @@ S3_BUCKET: "yamlenv"
 SECRET_KEY: "secret_key"
 ```
 
-Now create a file named `env.yaml.dist` and check this into the project. This
+Now create a file named `env.yml.dist` and check this into the project. This
 should have the ENV variables you need to have set, but the values should
 either be blank or filled with dummy data. The idea is to let people know what
 variables are required, but not give them the sensitive production values.
@@ -79,14 +79,14 @@ S3_BUCKET: "devbucket"
 SECRET_KEY: "abc123"
 ```
 
-You can then load `env.yaml` in your application with:
+You can then load `env.yml` in your application with:
 
 ```php
 $yamlenv = new Yamlenv\Yamlenv(__DIR__);
 $yamlenv->load();
 ```
 
-Optionally you can pass in a filename as the second parameter, if you would like to use something other than `env.yaml`
+Optionally you can pass in a filename as the second parameter, if you would like to use something other than `env.yml`
 
 ```php
 $yamlenv = new Yamlenv\Yamlenv(__DIR__, 'myconfig');
@@ -122,7 +122,7 @@ s3_bucket: "will_be_uppercase"
 ```
 
 ```php
-$yamlenv = new Yamlenv\Yamlenv(__DIR__, 'emv.yaml', true);
+$yamlenv = new Yamlenv\Yamlenv(__DIR__, 'emv.yml', true);
 $yamlenv->load();
 ```
 
@@ -253,7 +253,7 @@ allowed value
 
 ### Comments
 
-You can comment your `env.yaml` file using the `#` character. E.g.
+You can comment your `env.yml` file using the `#` character. E.g.
 This follows the normal Yaml syntax rules
 
 ```shell
@@ -281,18 +281,12 @@ Usage Notes
 -----------
 
 When a new developer clones your codebase, they will have an additional
-**one-time step** to manually copy the `env.yaml.dist` file to `env.yaml` and fill-in
+**one-time step** to manually copy the `env.yml.dist` file to `env.yml` and fill-in
 their own values (or get any sensitive values from a project co-worker).
 
 Yamlenv is made for development environments, and generally should not be
 used in production. In production, the actual environment variables should be
-set so that there is no overhead of loading the `env.yaml` file on each request.
+set so that there is no overhead of loading the `env.yml` file on each request.
 This can be achieved via an automated deployment process with tools like
 Vagrant, chef, or Puppet, or can be set manually with cloud hosts like
 Pagodabox and Heroku.
-
-### Command Line Scripts
-
-If you need to use environment variables that you have set in your `env.yaml` file
-in a command line script that doesn't use the Yamlenv library, you can `source`
-it into your local shell session:

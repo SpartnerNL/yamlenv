@@ -32,7 +32,7 @@ class Yamlenv
      * @param string $file
      * @param bool   $castToUpper
      */
-    public function __construct($path, $file = 'env.yaml', $castToUpper = false)
+    public function __construct($path, $file = 'env.yml', $castToUpper = false)
     {
         $this->filePath    = $this->getFilePath($path, $file);
         $this->castToUpper = $castToUpper;
@@ -100,7 +100,7 @@ class Yamlenv
     protected function getFilePath($path, $file)
     {
         if (!is_string($file)) {
-            $file = 'env.yaml';
+            $file = 'env.yml';
         }
 
         $filePath = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $file;

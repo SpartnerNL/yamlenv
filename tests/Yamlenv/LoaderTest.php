@@ -48,7 +48,7 @@ class LoaderTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->folder = dirname(__DIR__) . '/fixtures/valid/env.yaml';
+        $this->folder = dirname(__DIR__) . '/fixtures/valid/env.yml';
 
         // Generate a new, random keyVal.
         $this->keyVal(true);
@@ -138,7 +138,7 @@ class LoaderTest extends PHPUnit_Framework_TestCase
     {
         $this->clearEnv();
 
-        $immutableLoader = new Loader(dirname(__DIR__) . '/fixtures/valid/duplicates_nested.yaml', true);
+        $immutableLoader = new Loader(dirname(__DIR__) . '/fixtures/valid/duplicates_nested.yml', true);
         $immutableLoader->load();
     }
 
