@@ -73,7 +73,7 @@ class Yamlenv
     }
 
     /**
-     * Get loader instance
+     * Get loader instance.
      *
      * @throws LoaderException
      *
@@ -81,8 +81,7 @@ class Yamlenv
      */
     public function getLoader()
     {
-        if(!$this->loader)
-        {
+        if (!$this->loader) {
             throw new LoaderException('Loader has not been initialized yet.');
         }
 
@@ -134,5 +133,35 @@ class Yamlenv
         $this->initialize($overload);
 
         return $this->loader->load();
+    }
+
+    /**
+     * Get an environment value. Returns the default when it is null.
+     *
+     * @param string $key
+     * @param null   $default
+     *
+     * @return null|string
+     */
+    public function getEnv($key, $default = null)
+    {
+        $value = $this->getLoader()->getEnvironmentVariable($key);
+
+        return is_null($value) ? $default : $value;
+    }
+
+    /**
+     * Get the raw env value from the Yaml. Can be used to fetch associative arrays from the Yaml file.
+     *
+     * @param string $key
+     * @param null   $default
+     *
+     * @return array|null|string
+     */
+    public function getRawEnv($key, $default = null)
+    {
+        $value = $this->getLoader()->getYamlValue($key);
+
+        return is_null($value) ? $default : $value;
     }
 }

@@ -13,10 +13,12 @@ class LoaderTest extends PHPUnit_Framework_TestCase
      * @var \Yamlenv\Loader
      */
     private $immutableLoader;
+
     /**
      * @var array
      */
     private $keyVal;
+
     /**
      * @var \Yamlenv\Loader
      */
@@ -140,6 +142,34 @@ class LoaderTest extends PHPUnit_Framework_TestCase
 
         $immutableLoader = new Loader(dirname(__DIR__) . '/fixtures/valid/duplicates_nested.yml', true);
         $immutableLoader->load();
+    }
+
+    public function testItCanReturnAnAssociativeArray()
+    {
+        $expected = [
+            'ARRAY_ONE' => 1,
+            'ARRAY_TWO' => 2,
+        ];
+
+        $this->mutableLoader->load();
+
+        $actual = $this->mutableLoader->getYamlValue('NESTED');
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testItCanReturnAnAssociativeArrayFromADeepLevel()
+    {
+        $expected = [
+            'ARRAY_ONE' => 1,
+            'ARRAY_TWO' => 2,
+        ];
+
+        $this->mutableLoader->load();
+
+        $actual = $this->mutableLoader->getYamlValue('MULTI.LEVEL.NESTED');
+
+        $this->assertEquals($expected, $actual);
     }
 
     /**

@@ -129,7 +129,7 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
         $yamlenv = new Yamlenv($this->fixturesFolder);
         $yamlenv->load();
         $validator = $yamlenv->required(['FOO', 'BAR']);
--
+
         $this->assertInstanceOf(Validator::class, $validator);
     }
 
@@ -451,6 +451,36 @@ class YamlenvTest extends PHPUnit_Framework_TestCase
         $yamlenv->getLoader();
     }
 
+    public function testGetEnvReturnsTheEnvValue()
+    {
+        $this->clearEnv();
+
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'env.yml');
+        $yamlenv->load();
+
+        $expected = 'bar';
+
+        $actual = $yamlenv->getEnv('FOO');
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testGetRawEnvReturnsTheYamlValue()
+    {
+        $this->clearEnv();
+
+        $yamlenv = new Yamlenv($this->fixturesFolder, 'env.yml');
+        $yamlenv->load();
+
+        $expected = [
+            'ARRAY_ONE' => 1,
+            'ARRAY_TWO' => 2,
+        ];
+
+        $actual = $yamlenv->getRawEnv('NESTED');
+
+        $this->assertEquals($expected, $actual);
+    }
 
     /**
      * Clear all env vars.
