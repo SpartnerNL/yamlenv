@@ -326,4 +326,32 @@ class Loader
 
         return $key;
     }
+
+    /**
+     * @param string $key
+     *
+     * @return string|array|null
+     */
+    public function getYamlValue($key)
+    {
+        if (is_null($key)) {
+            return null;
+        }
+
+        if (isset($this->yamlVariables[$key])) {
+            return $this->yamlVariables[$key];
+        }
+
+        $array = $this->yamlVariables;
+
+        foreach (explode('.', $key) as $segment) {
+            if (! is_array($array) || ! array_key_exists($segment, $array)) {
+                return null;
+            }
+
+            $array = $array[$segment];
+        }
+
+        return $array;
+    }
 }
