@@ -203,6 +203,10 @@ class Loader
             $value = $value === true ? 'true' : 'false';
         }
 
+        if (is_array($value)) {
+            return $value;
+        }
+
         return trim($value);
     }
 
@@ -264,7 +268,11 @@ class Loader
 
                 $outputArray = array_merge($outputArray, $flattenedValues);
             } else {
-                $outputArray[$combinedKey] = $value;
+                if (is_array($value)) {
+                    $outputArray[$combinedKey] = json_encode($value);
+                } else {
+                    $outputArray[$combinedKey] = $value;
+                }
             }
         }
 
@@ -301,8 +309,6 @@ class Loader
 
     /**
      * Read ( multidimensional ) array and return flat list of env variables.
-     *
-     * @return array
      */
     private function setEnvironmentVariables()
     {
