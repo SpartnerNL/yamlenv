@@ -16,7 +16,7 @@ There is no reason why you shouldn't use a package like that in your projects,
 especially if the amount of variables you need to manage is relatively small.
 
 In case of larger, enterprise scale, applications, the amount of environment 
-settings might very quickly become unmanageable. If it's a multi tenant system een more so. And if you're supporting different versions of the application with it's own list of required environment settings, it soon becomes a necessity to automate this process. 
+settings might very quickly become unmanageable. If it's a multi tenant system even more so. And if you're supporting different versions of the application with its own list of required environment settings, it soon becomes a necessity to automate this process. 
 
 These are largely the reasons we decided to move towards Yaml. It provides 
 a few simple advantages over env.yml files:
