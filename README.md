@@ -7,7 +7,7 @@ This is package is based on [vlucas/phpdotenv](https://github.com/vlucas/phpdote
 
 [![Build Status](https://travis-ci.org/Maatwebsite/yamlenv.svg?branch=master)](https://travis-ci.org/Maatwebsite/yamlenv.svg?branch=master)
 
-Why choose Yaml over env.yml?
+Why choose Yaml over .env?
 ---------
 The benefits of using a env.yml file or similar has been proven a long time ago. 
 The popularity of [vlucas/phpdotenv](https://github.com/vlucas/phpdotenv) and 
