@@ -156,8 +156,7 @@ class Loader
 
             // During initialization we want to keep all existing environment variables
             // e.g. Anything set on an apache or server level
-            if($initialization)
-            {
+            if($initialization) {
                 return;
             }
 
